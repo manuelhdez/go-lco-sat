@@ -12,9 +12,21 @@ import (
 )
 
 func main() {
-	fmt.Printf("Iniciado: %v\n", time.Now())
 
-	fileURL := "https://cfdisat.blob.core.windows.net/lco?restype=container&comp=list&prefix=LCO_2019-10-18"
+	// ARGS: Date
+	date := time.Now().Format("2006-01-02")
+	args := os.Args[1:]
+
+	if len(args) > 0 {
+		if args[0] == "--date" {
+			date = args[1]
+		}
+	}
+
+	// INICIO
+	fmt.Printf("Iniciado: %v\n\n", time.Now())
+
+	fileURL := "https://cfdisat.blob.core.windows.net/lco?restype=container&comp=list&prefix=LCO_" + date
 	fmt.Println("Downloading LCO ... ")
 	if err := f.DownloadFile("LCO.xml", fileURL); err != nil {
 		panic(err)
@@ -54,7 +66,7 @@ func main() {
 				fmt.Println(err)
 			}
 
-			fmt.Println("Processing XML... ", fileName.Name)
+			fmt.Println("Processing XML... ", lcoXMLFile)
 			f.ProcessLCOFile(lcoXMLFile)
 
 			fmt.Printf("-----:::-----:::-----\n\n")

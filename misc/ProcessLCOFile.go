@@ -9,6 +9,10 @@ import (
 	"os"
 )
 
+// MaxToFlush es el maximo de bytes antes de hacer flush al
+// NewWriter de bufio
+const MaxToFlush = 250000
+
 // ProcessLCOFile ...
 func ProcessLCOFile(file string) {
 
@@ -28,12 +32,12 @@ func ProcessLCOFile(file string) {
 	defer txtFile.Close()
 
 	w := bufio.NewWriter(txtFile)
-	lines := "RFC,CERTIFICADO,ESTATUS,FECHA_INICIO,FECHA_FINAL"
+	lines := "RFC,CERTIFICADO,VALIDEZ,ESTATUS,FECHA_INICIO,FECHA_FINAL"
 	// Crear archivo CSV: END
 
 	for {
 		// Escribir en Archivo: START
-		if len(lines) > 5000 {
+		if len(lines) > MaxToFlush {
 			w.WriteString(lines)
 			w.Flush()
 			lines = ""
@@ -47,7 +51,7 @@ func ProcessLCOFile(file string) {
 				w.WriteString(lines)
 				w.Flush()
 			}
-			fmt.Println("Terminando de procesar...")
+			fmt.Printf("Terminando de procesar...%v\n", file)
 			break
 		}
 		switch x := t.(type) {
@@ -83,5 +87,5 @@ func ProcessLCOFile(file string) {
 
 // RfcLineData ...
 func RfcLineData(rfc m.Lco) string {
-	return rfc.Rfc + "," + rfc.Certificado.NoCertificado + "," + rfc.Certificado.EstatusCertificado + "," + rfc.Certificado.FechaInicio + "," + rfc.Certificado.FechaFinal
+	return rfc.Rfc + "," + rfc.Certificado.NoCertificado + "," + rfc.Certificado.ValidezObligaciones + "," + rfc.Certificado.EstatusCertificado + "," + rfc.Certificado.FechaInicio + "," + rfc.Certificado.FechaFinal
 }
