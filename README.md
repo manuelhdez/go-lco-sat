@@ -14,5 +14,6 @@ La fecha está en formato **YYYY-MM-DD**.
 2. **XML** - Lee la lista de BLOBs
 3. **Descarga** - Se descargan la lista de BLOBs
 4. **Proceso** - Se procesa cada archivo
+5. **CSV** - Crea un archivo CSV
 
 ### Saludos...
