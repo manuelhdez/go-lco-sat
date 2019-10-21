@@ -20,10 +20,33 @@ func ProcessLCOFile(file string) {
 
 	decoder := xml.NewDecoder(re)
 
+	// Crear archivo CSV: START
+	txtFile, errFile := os.Create(file + ".csv")
+	if errFile != nil {
+		panic(errFile)
+	}
+	defer txtFile.Close()
+
+	w := bufio.NewWriter(txtFile)
+	lines := "RFC,CERTIFICADO,ESTATUS,FECHA_INICIO,FECHA_FINAL"
+	// Crear archivo CSV: END
+
 	for {
+		// Escribir en Archivo: START
+		if len(lines) > 5000 {
+			w.WriteString(lines)
+			w.Flush()
+			lines = ""
+		}
+		// Escribir en Archivo: END
+
 		t, err := decoder.Token()
 		if err != nil {
 			//panic(err)
+			if len(lines) > 0 {
+				w.WriteString(lines)
+				w.Flush()
+			}
 			fmt.Println("Terminando de procesar...")
 			break
 		}
@@ -40,10 +63,10 @@ func ProcessLCOFile(file string) {
 				if err != nil {
 					panic(err)
 				}
-				fmt.Printf("%v :: %v \n", rfc.Rfc, rfc.Certificado.NoCertificado)
+				// fmt.Printf("%v :: %v \n", rfc.Rfc, rfc.Certificado.NoCertificado)
+				lines += "\n" + RfcLineData(rfc)
 			default:
-				//fmt.Println(t)
-				fmt.Printf("Unexpected SE {%s}%s\n", x.Name.Space, x.Name.Local)
+				// fmt.Printf("Unexpected SE {%s}%s\n", x.Name.Space, x.Name.Local)
 			}
 		case xml.EndElement:
 			switch x.Name {
@@ -51,9 +74,14 @@ func ProcessLCOFile(file string) {
 				fmt.Println("end of input")
 				return
 			default:
-				fmt.Printf("Unexpected EE {%s}%s\n", x.Name.Space, x.Name.Local)
+				// fmt.Printf("Unexpected EE {%s}%s\n", x.Name.Space, x.Name.Local)
 			}
 		}
 	}
 
+}
+
+// RfcLineData ...
+func RfcLineData(rfc m.Lco) string {
+	return rfc.Rfc + "," + rfc.Certificado.NoCertificado + "," + rfc.Certificado.EstatusCertificado + "," + rfc.Certificado.FechaInicio + "," + rfc.Certificado.FechaFinal
 }
