@@ -13,7 +13,8 @@ import (
 
 func main() {
 
-	// ARGS: Date
+	var createdFiles []string
+
 	date := time.Now().Format("2006-01-02")
 	args := os.Args[1:]
 
@@ -26,16 +27,17 @@ func main() {
 	ch := make(chan string)
 
 	// INICIO
-	fmt.Printf("Iniciado: %v\n\n", time.Now())
+	fmt.Printf("Starting... %v\n\n", time.Now())
 
 	fileURL := "https://cfdisat.blob.core.windows.net/lco?restype=container&comp=list&prefix=LCO_" + date
-	fmt.Println("Downloading LCO ... ")
+	fmt.Println("Downloading LCO...")
 	go f.DownloadFile("LCO.xml", fileURL, ch)
-	fmt.Println(<-ch)
+	_ = <-ch
 
 	xmlFile, err := os.Open("LCO.xml")
-	defer os.Remove("LCO.xml")
-	defer xmlFile.Close()
+
+	createdFiles = append(createdFiles, "LCO.xml")
+
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -49,27 +51,12 @@ func main() {
 		lenBlobs := len(enums.Enumerations[i].Blobs)
 		for j := 0; j < lenBlobs; j++ {
 			fileName := enums.Enumerations[i].Blobs[j]
-			fmt.Printf("Analizing ... %v :: %v\n", fileName.Name, fileName.Properties.ContentMD5)
 
-			fmt.Println("Downloading... ", fileName.URL)
+			fmt.Println("Downloading...", fileName.URL)
 			go f.DownloadFile(fileName.Name, fileName.URL, ch)
 
-			// fmt.Println("Extracting GZ... ", fileName.Name)
-			// lcoXMLFile, errGz := f.UnGZip(fileName.Name, ".")
-			// if errGz != nil {
-			// 	log.Fatal(errGz)
-			// }
+			createdFiles = append(createdFiles, fileName.Name)
 
-			// fmt.Println("Deleting GZ... ", fileName.Name)
-			// err := os.Remove(fileName.Name)
-			// if err != nil {
-			// 	fmt.Println(err)
-			// }
-
-			// fmt.Println("Processing XML... ", lcoXMLFile)
-			// f.ProcessLCOFile(lcoXMLFile)
-
-			fmt.Printf("-----:::-----:::-----\n\n")
 			cChannel++
 		}
 	}
@@ -77,18 +64,27 @@ func main() {
 	cnP := make(chan string)
 	for i := 0; i < cChannel; i++ {
 		nf := <-ch
-		fmt.Println(i, nf)
+		fmt.Println("Extracting...", nf)
 		lcoXMLFile, errGz := f.UnGZip(nf, ".")
 		if errGz != nil {
 			log.Fatal(errGz)
 		}
+		fmt.Println("Processing...", nf)
 		go f.ProcessLCOFile(lcoXMLFile, cnP)
+		createdFiles = append(createdFiles, lcoXMLFile)
 	}
 
 	for i := 0; i < cChannel; i++ {
 		nf := <-cnP
-		fmt.Println(i, nf)
+		fmt.Println(nf)
 	}
-	fmt.Printf("Finalizado: %v\n", time.Now())
+
+	fmt.Println("Deleting files...")
+	xmlFile.Close()
+	for _, f := range createdFiles {
+		os.Remove(f)
+	}
+
+	fmt.Printf("Finishing... %v\n", time.Now())
 
 }

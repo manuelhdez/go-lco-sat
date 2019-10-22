@@ -51,7 +51,7 @@ func ProcessLCOFile(file string, ch chan<- string) {
 				w.WriteString(lines)
 				w.Flush()
 			}
-			fmt.Printf("Terminando de procesar...%v\n", file)
+			fmt.Printf("Processed...")
 			break
 		}
 		switch x := t.(type) {
