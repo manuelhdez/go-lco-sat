@@ -23,14 +23,15 @@ func main() {
 		}
 	}
 
+	ch := make(chan string)
+
 	// INICIO
 	fmt.Printf("Iniciado: %v\n\n", time.Now())
 
 	fileURL := "https://cfdisat.blob.core.windows.net/lco?restype=container&comp=list&prefix=LCO_" + date
 	fmt.Println("Downloading LCO ... ")
-	if err := f.DownloadFile("LCO.xml", fileURL); err != nil {
-		panic(err)
-	}
+	go f.DownloadFile("LCO.xml", fileURL, ch)
+	fmt.Println(<-ch)
 
 	xmlFile, err := os.Open("LCO.xml")
 	defer os.Remove("LCO.xml")
@@ -43,6 +44,7 @@ func main() {
 	var enums m.Enumerations
 	xml.Unmarshal(byteValue, &enums)
 
+	cChannel := 0
 	for i := 0; i < len(enums.Enumerations); i++ {
 		lenBlobs := len(enums.Enumerations[i].Blobs)
 		for j := 0; j < lenBlobs; j++ {
@@ -50,29 +52,43 @@ func main() {
 			fmt.Printf("Analizing ... %v :: %v\n", fileName.Name, fileName.Properties.ContentMD5)
 
 			fmt.Println("Downloading... ", fileName.URL)
-			if err := f.DownloadFile(fileName.Name, fileName.URL); err != nil {
-				panic(err)
-			}
+			go f.DownloadFile(fileName.Name, fileName.URL, ch)
 
-			fmt.Println("Extracting GZ... ", fileName.Name)
-			lcoXMLFile, errGz := f.UnGZip(fileName.Name, ".")
-			if errGz != nil {
-				log.Fatal(errGz)
-			}
+			// fmt.Println("Extracting GZ... ", fileName.Name)
+			// lcoXMLFile, errGz := f.UnGZip(fileName.Name, ".")
+			// if errGz != nil {
+			// 	log.Fatal(errGz)
+			// }
 
-			fmt.Println("Deleting GZ... ", fileName.Name)
-			err := os.Remove(fileName.Name)
-			if err != nil {
-				fmt.Println(err)
-			}
+			// fmt.Println("Deleting GZ... ", fileName.Name)
+			// err := os.Remove(fileName.Name)
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
 
-			fmt.Println("Processing XML... ", lcoXMLFile)
-			f.ProcessLCOFile(lcoXMLFile)
+			// fmt.Println("Processing XML... ", lcoXMLFile)
+			// f.ProcessLCOFile(lcoXMLFile)
 
 			fmt.Printf("-----:::-----:::-----\n\n")
+			cChannel++
 		}
 	}
 
+	cnP := make(chan string)
+	for i := 0; i < cChannel; i++ {
+		nf := <-ch
+		fmt.Println(i, nf)
+		lcoXMLFile, errGz := f.UnGZip(nf, ".")
+		if errGz != nil {
+			log.Fatal(errGz)
+		}
+		go f.ProcessLCOFile(lcoXMLFile, cnP)
+	}
+
+	for i := 0; i < cChannel; i++ {
+		nf := <-cnP
+		fmt.Println(i, nf)
+	}
 	fmt.Printf("Finalizado: %v\n", time.Now())
 
 }

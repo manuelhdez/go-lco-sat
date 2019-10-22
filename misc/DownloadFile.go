@@ -7,7 +7,7 @@ import (
 )
 
 // DownloadFile ...
-func DownloadFile(filepath string, url string) error {
+func DownloadFile(filepath string, url string, ch chan<- string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -19,5 +19,6 @@ func DownloadFile(filepath string, url string) error {
 	}
 	defer out.Close()
 	_, err = io.Copy(out, resp.Body)
+	ch <- filepath
 	return err
 }

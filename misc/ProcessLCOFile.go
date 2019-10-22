@@ -14,7 +14,7 @@ import (
 const MaxToFlush = 250000
 
 // ProcessLCOFile ...
-func ProcessLCOFile(file string) {
+func ProcessLCOFile(file string, ch chan<- string) {
 
 	rfcFile, _ := os.Open(file)
 	defer rfcFile.Close()
@@ -82,7 +82,7 @@ func ProcessLCOFile(file string) {
 			}
 		}
 	}
-
+	ch <- file
 }
 
 // RfcLineData ...
