@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	db "lco/db"
 	f "lco/misc"
 	m "lco/models"
 	"log"
@@ -76,7 +77,8 @@ func main() {
 
 	for i := 0; i < cChannel; i++ {
 		nf := <-cnP
-		fmt.Println(nf)
+		// db.MyMySQL(nf)
+		db.MyPG(nf)
 	}
 
 	fmt.Println("Deleting files...")
