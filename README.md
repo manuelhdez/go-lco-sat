@@ -15,5 +15,6 @@ La fecha está en formato **YYYY-MM-DD**.
 3. **Descarga** - Se descargan la lista de BLOBs
 4. **Proceso** - Se procesa cada archivo
 5. **CSV** - Crea un archivo CSV
+6. **Database** - Guarda la informacion en Base de Datos
 
 ### Saludos...
