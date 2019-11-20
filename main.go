@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const CSV_FILE = "csv_files.txt"
+
 func main() {
 
 	var createdFiles []string
@@ -74,15 +76,22 @@ func main() {
 		createdFiles = append(createdFiles, lcoXMLFile)
 	}
 
+	csvFiles := ""
 	for i := 0; i < cChannel; i++ {
 		nf := <-cnP
 		fmt.Println(nf)
+		csvFiles = csvFiles + nf + "\r\n"
 	}
 
 	fmt.Println("Deleting files...")
 	xmlFile.Close()
 	for _, f := range createdFiles {
 		os.Remove(f)
+	}
+
+	err = ioutil.WriteFile(CSV_FILE, []byte(csvFiles), 0644)
+	if err != nil {
+		panic(err)
 	}
 
 	fmt.Printf("Finishing... %v\n", time.Now())
