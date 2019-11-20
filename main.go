@@ -12,7 +12,8 @@ import (
 	"time"
 )
 
-const CSV_FILE = "csv_files.txt"
+// CSVFileName para escribir una lista de los archivos descargados
+const CSVFileName = "csv_files.txt"
 
 func main() {
 
@@ -92,7 +93,7 @@ func main() {
 		os.Remove(f)
 	}
 
-	err = ioutil.WriteFile(CSV_FILE, []byte(csvFiles), 0644)
+	err = ioutil.WriteFile(CSVFileName, []byte(csvFiles), 0644)
 	if err != nil {
 		panic(err)
 	}
