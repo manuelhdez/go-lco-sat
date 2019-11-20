@@ -17,4 +17,12 @@ La fecha está en formato **YYYY-MM-DD**.
 5. **CSV** - Crea un archivo CSV
 6. **Database** - Guarda la informacion en Base de Datos
 
+## FUNCIONES DB
+
+Puedes ir a [esta URL](https://github.com/manuelhdez/go-lco-sat/tree/database) para ver el funcionamiento con Base de Datos en MySQL y PostgreSQL
+
+```bash
+https://github.com/manuelhdez/go-lco-sat/tree/database
+```
+
 ### Saludos...
